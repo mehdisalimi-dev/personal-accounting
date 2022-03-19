@@ -14,4 +14,24 @@ class Cost extends Model
     {
         return $this->hasOne(CostCategory::class,'id','cost_category_id');
     }
+
+    /*
+     * SumOfCosts calculates total costs by categories.
+     */
+    public function SumOfCosts()
+    {
+        $costs = Cost::select('cost.*','cost_category.title')
+        ->join('cost_category', 'cost.cost_category_id', '=', 'cost_category.id')
+        ->get();
+
+        $reportArray = [];
+        foreach ($costs as $cost) {
+            $sumAmount = isset($reportArray[$cost['cost_category_id']]) ? $cost['amount'] + $reportArray[$cost['cost_category_id']]['amount'] : (int)$cost['amount'];
+            $reportArray[$cost['cost_category_id']] = [
+                "title" => $cost['title'],
+                "amount" => $sumAmount
+            ];
+        }
+        return $reportArray;
+    }
 }
